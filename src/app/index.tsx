@@ -1,98 +1,137 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useState } from 'react';
+import { View, Text, TextInput, FlatList, StyleSheet, SafeAreaView, Platform, StatusBar } from 'react-native';
+import InfoCard from '../components/InfoCard';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+const DAFTAR_MAHASISWA = [
+  { id: '1', nama: 'Alifia Putri', prodi: 'Sistem Informasi' },
+  { id: '2', nama: 'Budi Santoso', prodi: 'Teknologi Informasi' },
+  { id: '3', nama: 'Citra Dewi', prodi: 'Sistem Informasi' },
+  { id: '4', nama: 'Dimas Anggara', prodi: 'Teknik Informatika' },
+  { id: '5', nama: 'Eka Nur Safitri', prodi: 'Sistem Informasi' },
+];
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
+export default function App() {
+  const [keyword, setKeyword] = useState('');
+
+  const filteredData = DAFTAR_MAHASISWA.filter((item) =>
+    item.nama.toLowerCase().includes(keyword.toLowerCase())
   );
-}
 
-export default function HomeScreen() {
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        
+        {/* Bagian Daftar Tugas */}
+        <View style={styles.section}>
+          <Text style={styles.header}>Daftar Tugas</Text>
+          <InfoCard 
+            title="Desain UI/UX Aplikasi" 
+            status="selesai" 
+            onPress={() => alert('Detail Tugas UI/UX')} 
           />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
+          <InfoCard 
+            title="Ujian Mobile Computing" 
+            status="proses" 
+            onPress={() => alert('Detail Ujian Mobile Computing')} 
           />
-        </ThemedView>
+        </View>
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+        {/* Bagian Direktori Mahasiswa */}
+        <View style={styles.sectionFlex}>
+          <Text style={styles.header}>Direktori Mahasiswa</Text>
+          
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="🔍 Cari nama mahasiswa..."
+              placeholderTextColor="#9ca3af"
+              value={keyword}
+              onChangeText={setKeyword}
+            />
+          </View>
+
+          <FlatList
+            data={filteredData}
+            keyExtractor={(item) => item.id}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.listContainer}
+            renderItem={({ item }) => (
+              <View style={styles.listItem}>
+                <View style={styles.avatar}>
+                  <Text style={styles.avatarText}>{item.nama.charAt(0)}</Text>
+                </View>
+                <View style={styles.itemInfo}>
+                  <Text style={styles.itemName}>{item.nama}</Text>
+                  <Text style={styles.itemProdi}>{item.prodi}</Text>
+                </View>
+              </View>
+            )}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>Oops! Mahasiswa tidak ditemukan.</Text>
+              </View>
+            }
+          />
+        </View>
+
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+  safeArea: { 
+    flex: 1, 
+    backgroundColor: '#f3f4f6', 
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 
   },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+  container: { flex: 1, paddingHorizontal: 20 },
+  section: { marginTop: 20, marginBottom: 15 },
+  sectionFlex: { flex: 1 },
+  header: { fontSize: 22, fontWeight: '800', color: '#111827', marginBottom: 10 },
+  
+  searchContainer: { marginBottom: 15 },
+  searchInput: { 
+    backgroundColor: '#ffffff', 
+    padding: 14, 
+    borderRadius: 12, 
+    fontSize: 16, 
+    color: '#1f2937', 
+    shadowColor: '#000', 
+    shadowOffset: { width: 0, height: 2 }, 
+    shadowOpacity: 0.05, 
+    shadowRadius: 4, 
+    elevation: 2 
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+  
+  listContainer: { paddingBottom: 20 },
+  listItem: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    backgroundColor: '#ffffff', 
+    padding: 15, 
+    borderRadius: 16, 
+    marginBottom: 12, 
+    shadowColor: '#000', 
+    shadowOffset: { width: 0, height: 2 }, 
+    shadowOpacity: 0.05, 
+    shadowRadius: 4, 
+    elevation: 2 
   },
-  title: {
-    textAlign: 'center',
+  avatar: { 
+    width: 50, 
+    height: 50, 
+    borderRadius: 25, 
+    backgroundColor: '#e0e7ff', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    marginRight: 15 
   },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
+  avatarText: { fontSize: 20, fontWeight: 'bold', color: '#4f46e5' },
+  itemInfo: { flex: 1 },
+  itemName: { fontSize: 16, fontWeight: '700', color: '#1f2937', marginBottom: 4 },
+  itemProdi: { fontSize: 14, color: '#6b7280' },
+  
+  emptyContainer: { alignItems: 'center', marginTop: 30 },
+  emptyText: { color: '#ef4444', fontStyle: 'italic', fontSize: 15 }
 });
